@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat com ChatGPT</title>
+    <style>
+        body { font-family: Arial, sans-serif; display: flex; align-items: center; justify-content: center; min-height: 100vh; background-color: #f4f4f9; }
+        #chat-container { width: 100%; max-width: 500px; background-color: #fff; border-radius: 8px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); padding: 20px; }
+        #messages { margin-bottom: 20px; overflow-y: auto; max-height: 300px; }
+        .message { padding: 10px; border-radius: 5px; margin-bottom: 10px; }
+        .user { background-color: #e1ffc7; text-align: right; }
+        .bot { background-color: #f1f0f0; text-align: left; }
+    </style>
+</head>
+<body>
+    <div id="chat-container">
+        <div id="messages"></div>
+        <input type="text" id="userInput" placeholder="Digite sua mensagem..." autocomplete="off">
+        <button onclick="sendMessage()">Enviar</button>
+    </div>
+
+    <script>
+        // Função para exibir a mensagem no chat
+        function displayMessage(text, className) {
+            const messageDiv = document.createElement("div");
+            messageDiv.className = `message ${className}`;
+            messageDiv.textContent = text;
+            document.getElementById("messages").appendChild(messageDiv);
+            messageDiv.scrollIntoView();
+        }
+
+        // Função para enviar a mensagem para o backend
+        async function sendMessage() {
+            const userInput = document.getElementById("userInput");
+            const userMessage = userInput.value.trim();
+            if (!userMessage) return;
+
+            // Exibe a mensagem do usuário no chat
+            displayMessage(userMessage, "user");
+            userInput.value = ""; // Limpa o input
+
+            // Envia a mensagem para o backend
+            try {
+                const response = await fetch("http://localhost:3000/chat", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ mensagem: userMessage })
+                });
+                const data = await response.json();
+
+                // Exibe a resposta do ChatGPT no chat
+                displayMessage(data.resposta, "bot");
+            } catch (error) {
+                console.error("Erro ao enviar a mensagem:", error);
+                displayMessage("Erro ao se conectar ao servidor.", "bot");
+            }
+        }
+    </script>
+</body>
+</html>
